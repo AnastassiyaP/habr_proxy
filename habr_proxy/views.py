@@ -11,6 +11,8 @@ def habr_proxy(request, path):
     response = proxy_view(request, url)
     soup = bs4.BeautifulSoup(response.content, 'html.parser')
 
+    habr_link = re.compile('https?://habr\.com')
+    local_link = r'http://127.0.0.1:8000'
     for string in soup.findAll(string=True):
         if (type(string) == bs4.element.NavigableString and
               string.parent.name not in ['script','style']):
@@ -18,9 +20,10 @@ def habr_proxy(request, path):
             if(string != res):
                 string.replaceWith(res)
 
-    for a in soup.find_all('a', href=re.compile('https?://habr\.com')):
-        link = re.sub(r'^https?://habr.com', r'http://127.0.0.1:8000', a['href'])
-        a['href'] = link
+    for attr_name in ('xlink:href', 'href'):
+        for tag in soup.find_all(attrs={attr_name: habr_link}):
+            link = re.sub(habr_link, local_link, tag[attr_name])
+            tag[attr_name] = link
         
     response.content = soup.prettify(formatter=None)
     return response
