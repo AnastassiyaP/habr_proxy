@@ -26,5 +26,11 @@ def habr_proxy(request, path):
             link = re.sub(habr_link, local_link, tag[attr_name])
             tag[attr_name] = link
 
-    response.content = soup.prettify(formatter=None)
+    response.content = soup.prettify(formatter=_formatter)
     return response
+
+def _formatter(str):
+    if (type(str) == bs4.element.NavigableString and
+            str.parent.name not in ['script', 'style']):
+        return str.replace('>', '&gt;').replace('<', '&lt;')
+    return str
