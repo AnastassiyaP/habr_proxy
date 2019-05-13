@@ -1,14 +1,15 @@
 import re
 
 import bs4
-import requests
-from django.http import HttpResponse
 from proxy.views import proxy_view
 
 
 def habr_proxy(request, path):
     url = ('https://habr.com/' + path)
     response = proxy_view(request, url)
+    if not re.match('text/html', response['Content-Type']):
+        return response
+
     soup = bs4.BeautifulSoup(response.content, 'html.parser')
 
     habr_link = re.compile('https?://habr\.com')
