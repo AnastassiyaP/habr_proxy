@@ -2,9 +2,9 @@ import re
 
 import bs4
 import requests
-
 from django.http import HttpResponse
 from proxy.views import proxy_view
+
 
 def habr_proxy(request, path):
     url = ('https://habr.com/' + path)
@@ -15,7 +15,7 @@ def habr_proxy(request, path):
     local_link = r'http://127.0.0.1:8000'
     for string in soup.findAll(string=True):
         if (type(string) == bs4.element.NavigableString and
-              string.parent.name not in ['script','style']):
+                string.parent.name not in ['script', 'style']):
             res = re.sub(r'\b(\w{6})\b', r'\1™', string)
             if(string != res):
                 string.replaceWith(res)
@@ -24,6 +24,6 @@ def habr_proxy(request, path):
         for tag in soup.find_all(attrs={attr_name: habr_link}):
             link = re.sub(habr_link, local_link, tag[attr_name])
             tag[attr_name] = link
-        
+
     response.content = soup.prettify(formatter=None)
     return response
