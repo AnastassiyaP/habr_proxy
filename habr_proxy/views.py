@@ -10,7 +10,7 @@ def habr_proxy(request, path):
     if not re.match('text/html', response['Content-Type']):
         return response
 
-    soup = bs4.BeautifulSoup(response.content, 'html.parser')
+    soup = bs4.BeautifulSoup(response.content, 'html5lib')
 
     habr_link = re.compile('https?://habr\.com')
     local_link = r'http://127.0.0.1:8000'
@@ -26,11 +26,5 @@ def habr_proxy(request, path):
             link = re.sub(habr_link, local_link, tag[attr_name])
             tag[attr_name] = link
 
-    response.content = soup.prettify(formatter=_formatter)
+    response.content = str(soup)
     return response
-
-def _formatter(str):
-    if (type(str) == bs4.element.NavigableString and
-            str.parent.name not in ['script', 'style']):
-        return str.replace('>', '&gt;').replace('<', '&lt;')
-    return str
